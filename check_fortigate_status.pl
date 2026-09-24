@@ -14,6 +14,14 @@ my %status = ( 'UNKNOWN' => '-1',
     'CRITICAL' => '2' );
 my ($ip, $mode, $community, $modus, $warn, $crit, $performance) = pars_args();
 
+# Apply mode-specific defaults only if the user didn't supply -w/-c explicitly.
+if (!defined($warn)) {
+  $warn = ($mode =~ "ses") ? "1500" : "80";
+}
+if (!defined($crit)) {
+  $crit = ($mode =~ "ses") ? "2000" : "90";
+}
+
 @oidDescTest = (".1.3.6.1.4.1.12356.1.3", ".1.3.6.1.2.1.47.1.1.1.1.10.1");
 until ($oidFound) {
 foreach $oidDesc (@oidDescTest) {
@@ -117,8 +125,6 @@ $usagestring = "Memory Usage";
 } elsif ($mode =~ "ses") {
 @sesArray = split(" ", $snmpCommand);
 $usage = @sesArray[-1];
-$warn = "1500";
-$crit = "2000";
 $usagestring = "Active IP Sessions";
 }
 
@@ -175,8 +181,8 @@ my $ip    = "";
 my $mode    = "";
 my $community = "public";
 my $modus   = "2";
-my $warn  = "80";
-my $crit  = "90";
+my $warn  = undef;
+my $crit  = undef;
 my $performance = "yes";
 while(@ARGV)
 {
